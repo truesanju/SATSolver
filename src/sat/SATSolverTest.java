@@ -14,8 +14,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-
 
 public class SATSolverTest {
     Literal a = PosLiteral.make("a");
@@ -26,6 +24,7 @@ public class SATSolverTest {
     Literal nc = c.getNegation();
 
     public static void main(String[] args) {
+
         String path =  "C:\\Users\\Charles\\Documents\\GitHub\\SATSolver\\sampleCNF\\s8Sat.cnf";
         Formula formula;
 
@@ -55,7 +54,7 @@ public class SATSolverTest {
                         clauseStr = currentLine.replace(" 0", "").split("\\s+");
                         for(int j=0;j<clauseStr.length;j++){
                             if(clauseStr[j].charAt(0)=='-'){
-                                literalList.add(NegLiteral.make(clauseStr[j]));
+                                literalList.add(NegLiteral.make(clauseStr[j].substring(1)));
                             } else{
                                 literalList.add(PosLiteral.make(clauseStr[j]));
                             }
@@ -71,11 +70,16 @@ public class SATSolverTest {
             clauseList.toArray(clauseArray);
             formula = makeFm(clauseArray);
             textReader.close();
+            System.out.println(formula);
+
+
 
         } catch(IOException e){
             System.out.println(e.getMessage());
         }
+
     }
+
 
 
 
