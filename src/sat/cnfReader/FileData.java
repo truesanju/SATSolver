@@ -10,7 +10,7 @@ import java.util.Arrays;
 public class FileData {
     public static void main(String[] args) throws IOException{
 
-        String file_name =  "C:/Users/Charles/Desktop/largeSat.CNF";
+        String file_name =  "C:\\Users\\Charles\\Documents\\GitHub\\SATSolver\\sampleCNF\\s8Sat.cnf";
 
         try{
             ReadFile file = new ReadFile(file_name);
