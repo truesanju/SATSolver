@@ -25,7 +25,7 @@ public class SATSolverTest {
 
     public static void main(String[] args) {
 
-        String path =  "C:\\Users\\Charles\\Documents\\GitHub\\SATSolver\\sampleCNF\\s8Sat.cnf";
+        String path =  "C:\\Users\\Charles\\Documents\\GitHub\\SATSolver\\sampleCNF\\largeSat.cnf";
         Formula formula;
 
         try{
