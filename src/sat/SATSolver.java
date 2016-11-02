@@ -2,6 +2,7 @@ package sat;
 
 import java.util.Iterator;
 
+import immutable.EmptyImList;
 import immutable.ImList;
 import sat.env.Bool;
 import sat.env.Environment;
@@ -28,49 +29,40 @@ public class SATSolver {
      *         null if no such environment exists.
      */
     public static Environment solve(Formula formula) {
-        // TODO: implement this.
+
         Environment e = new Environment();
 
         //Check for no clauses
         if(formula.getSize()==0){
             Variable v = new Variable(formula.toString());
             e.putTrue(v);
-            return e = null;
-        }
+            return e;
+        } else {
 
         //Check for empty clause
-        ImList<Clause> clauseList = formula.getClauses();
+        ImList<Clause> clauseList = formula.getClauses(); //returns ImList<Clause>
         Iterator<Clause> iter = formula.iterator();
-        while (iter.hasNext()){
+        Clause smallestClause = new Clause();
+        while (iter.hasNext()) {
             Clause currentClause = iter.next();
-            if (currentClause.isEmpty()){
-                Variable v = new Variable(currentClause.toString());
-                e.putFalse(v);
-                return e=null;
+            if (currentClause.size() == 1) {
+                currentClause = smallestClause;
             }
-        }
+            if (currentClause.isEmpty()) {
+                return e = null;
+            } else {
+                if (smallestClause.isUnit()){
+                    Variable v = new Variable(smallestClause.toString());
+                    e.putTrue(v);
+                    clauseList.remove(smallestClause);
+                    Formula f = new Formula()substitute(clauseList,smallestClause.chooseLiteral());
+
+                }
+
+            }
 
 
-
-
-
-
-
-
-
-
-        //Backtracking
-
-        //Choose a literal
-        //Assign truth value to literal
-        //Simplify formula
-        //Check satisfiable
-        //
-
-
-
-        throw new RuntimeException("not yet implemented.");
-    }
+    }}
 
     /**
      * Takes a partial assignment of variables to values, and recursively
@@ -101,8 +93,25 @@ public class SATSolver {
      */
     private static ImList<Clause> substitute(ImList<Clause> clauses,
             Literal l) {
-        // TODO: implement this.
-        throw new RuntimeException("not yet implemented.");
+        //Iterative implementation
+//        Iterator<Clause> iter = clauses.iterator();
+//        ImList<Clause> subsClauseList = new EmptyImList<Clause>();
+//        while(iter.hasNext()){
+//            Clause subsClause = iter.next();
+//            subsClause.reduce(l);
+//            subsClauseList.add(subsClause);
+//        }
+//        return subsClauseList;
+        Clause first = clauses.first().reduce(l);
+        ImList<Clause> rest = clauses.rest();
+        ImList<Clause> substituted = new EmptyImList<Clause>();
+        substituted.add(first);
+        if(rest.size()==0){
+            return substituted;
+        }
+        return substitute(rest,l);
+        }
+
     }
 
 }
