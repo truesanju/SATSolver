@@ -25,7 +25,7 @@ public class SATSolverTest {
 
     public static void main(String[] args) {
 
-        String path =  "C:\\Users\\Charles\\Documents\\GitHub\\SATSolver\\sampleCNF\\largeSat.cnf";
+        String path =  "C:\\Users\\Sanjay\\Desktop\\School\\Fall 2016\\Intro to Info Systems and Programming\\2D\\Project-2D-starting\\SATSolver\\sampleCNF\\s8Sat.cnf";
         Formula formula;
 
         try{
@@ -70,8 +70,7 @@ public class SATSolverTest {
             clauseList.toArray(clauseArray);
             formula = makeFm(clauseArray);
             textReader.close();
-            System.out.println(formula);
-
+            System.out.println(SATSolver.solve(formula));
 
 
         } catch(IOException e){
@@ -79,6 +78,8 @@ public class SATSolverTest {
         }
 
     }
+
+
 
 
 

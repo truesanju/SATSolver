@@ -16,6 +16,8 @@ import sat.formula.Literal;
  */
 public class SATSolver {
 
+
+    public static Environment e = new Environment();
     /**
      * Solve the problem using a simple version of DPLL with backtracking and
      * unit propagation. The returned environment binds literals of class
@@ -27,12 +29,11 @@ public class SATSolver {
      */
     public static Environment solve(Formula formula) {
 
-        Environment e = new Environment();
 
         //Check for no clauses
         if(formula.getSize()==0){
             Variable v = new Variable(formula.toString());
-            e.putTrue(v);
+            e = e.putTrue(v);
             return e;
         }
 
@@ -40,38 +41,50 @@ public class SATSolver {
         ImList<Clause> clauseList = formula.getClauses(); //returns ImList<Clause>
         Iterator<Clause> iter = formula.iterator();
         Clause smallestClause = new Clause();
+        int size = 10;
         while (iter.hasNext()) {
+
             Clause currentClause = iter.next();
-            if (currentClause.size() == 1) {
-                currentClause = smallestClause;
+
+
+            if (currentClause.size() < size) {
+                smallestClause = currentClause;
+                size=currentClause.size();
+
             }
             if (currentClause.isEmpty()) {
+
                 return e = null;
             }}
 
             if (smallestClause.isUnit()){
                     Variable v = new Variable(smallestClause.toString());
-                    e.putTrue(v);
-                    clauseList.remove(smallestClause);
+                    e = e.putTrue(v);
+
+                    clauseList = clauseList.remove(smallestClause);
                     Formula f = new Formula(substitute(clauseList,smallestClause.chooseLiteral()));
                     return solve(f);
                 } else {
                     Literal lit = smallestClause.chooseLiteral();
-                    Variable v = new Variable(lit.toString());
-                    try {
-                        e.putTrue(v);
+                System.out.println(smallestClause);
+                    Variable v = new Variable(lit.getVariable().toString());
+                try {
+                    e = e.put(v,Bool.FALSE);
+                    System.out.println("bef" + clauseList);
                         Formula f = new Formula(substitute(clauseList, lit));
-                        solve(f);
-                        return e;
+                    //problem with substitute
+                    System.out.println("lol "+f);
+                        return solve(f);
                     } catch (Exception ex)
                     {
                         try {
-                            e.putFalse(v);
+
+                            e= e.putFalse(v);
                             Literal nlit = lit.getNegation();
                             Formula f = new Formula(substitute(clauseList, nlit));
-                            solve(f);
-                            return e;
+                            return solve(f);
                         } catch (Exception x){
+
                             return e=null;
 
 
@@ -109,27 +122,39 @@ public class SATSolver {
      *            , a literal to set to true
      * @return a new list of clauses resulting from setting l to true
      */
+    private static ImList<Clause> substituted = new EmptyImList<Clause>();
+
     private static ImList<Clause> substitute(ImList<Clause> clauses,
             Literal l) {
-        //Iterative implementation
-//        Iterator<Clause> iter = clauses.iterator();
-//        ImList<Clause> subsClauseList = new EmptyImList<Clause>();
-//        while(iter.hasNext()){
-//            Clause subsClause = iter.next();
-//            subsClause.reduce(l);
-//            subsClauseList.add(subsClause);
-//        }
-//        return subsClauseList;
-        Clause first = clauses.first().reduce(l);
-        ImList<Clause> rest = clauses.rest();
-        ImList<Clause> substituted = new EmptyImList<Clause>();
-        substituted.add(first);
-        if(rest.size()==0){
-            return substituted;
-        }
-        return substitute(rest,l);
-        }
 
-    }
+
+        //Iterative implementation
+        Iterator<Clause> iter = clauses.iterator();
+        ImList<Clause> subsClauseList = new EmptyImList<Clause>();
+        while(iter.hasNext()){
+            Clause subsClause = iter.next();
+            subsClause = subsClause.reduce(l);
+            System.out.println(subsClause);
+            System.out.println(iter.hasNext());
+
+            if(!subsClause.equals(null)) {
+                subsClauseList = subsClauseList.add(subsClause);
+            }
+        }
+        return subsClauseList;
+//        Clause first = clauses.first().reduce(l);
+//        ImList<Clause> rest = clauses.rest();
+//        System.out.println(rest);
+//        if(!first.equals(null)) {
+//            substituted = substituted.add(first);
+//        }
+//
+//        if(rest.isEmpty()){
+//            return substituted;
+//        }
+//        return substitute(rest,l) ;
+//        }
+
+    }}
 
 

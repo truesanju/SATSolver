@@ -26,6 +26,7 @@ public class Environment {
      */
     private ImMap <Variable, Bool> bindings;
 
+
     private Environment(ImMap <Variable, Bool> bindings) {
         this.bindings = bindings;
     }
