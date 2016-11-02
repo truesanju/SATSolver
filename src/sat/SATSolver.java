@@ -16,9 +16,6 @@ import sat.formula.Literal;
  */
 public class SATSolver {
 
-
-
-
     /**
      * Solve the problem using a simple version of DPLL with backtracking and
      * unit propagation. The returned environment binds literals of class
@@ -37,7 +34,7 @@ public class SATSolver {
             Variable v = new Variable(formula.toString());
             e.putTrue(v);
             return e;
-        } else {
+        }
 
         //Check for empty clause
         ImList<Clause> clauseList = formula.getClauses(); //returns ImList<Clause>
@@ -50,19 +47,40 @@ public class SATSolver {
             }
             if (currentClause.isEmpty()) {
                 return e = null;
-            } else {
-                if (smallestClause.isUnit()){
+            }}
+
+            if (smallestClause.isUnit()){
                     Variable v = new Variable(smallestClause.toString());
                     e.putTrue(v);
                     clauseList.remove(smallestClause);
-                    Formula f = new Formula()substitute(clauseList,smallestClause.chooseLiteral());
+                    Formula f = new Formula(substitute(clauseList,smallestClause.chooseLiteral()));
+                    return solve(f);
+                } else {
+                    Literal lit = smallestClause.chooseLiteral();
+                    Variable v = new Variable(lit.toString());
+                    try {
+                        e.putTrue(v);
+                        Formula f = new Formula(substitute(clauseList, lit));
+                        solve(f);
+                        return e;
+                    } catch (Exception ex)
+                    {
+                        try {
+                            e.putFalse(v);
+                            Literal nlit = lit.getNegation();
+                            Formula f = new Formula(substitute(clauseList, nlit));
+                            solve(f);
+                            return e;
+                        } catch (Exception x){
+                            return e=null;
 
-                }
+
+                }}
 
             }
 
 
-    }}
+    }
 
     /**
      * Takes a partial assignment of variables to values, and recursively
@@ -114,4 +132,4 @@ public class SATSolver {
 
     }
 
-}
+

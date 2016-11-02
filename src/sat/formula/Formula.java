@@ -73,7 +73,7 @@ public class Formula {
         this(new NonEmptyImList<Clause>(c));
     }
 
-    private Formula(ImList<Clause> clauses) {
+    public Formula(ImList<Clause> clauses) {
         this.clauses = clauses;
     }
 
