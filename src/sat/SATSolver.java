@@ -16,7 +16,7 @@ import sat.formula.Literal;
  */
 public class SATSolver {
 
-
+    //Instantiate output environment
     public static Environment e = new Environment();
     /**
      * Solve the problem using a simple version of DPLL with backtracking and
@@ -30,14 +30,14 @@ public class SATSolver {
     public static Environment solve(Formula formula) {
 
 
-        //Check for no clauses
+        //If no clauses, return true
         if(formula.getSize()==0){
             Variable v = new Variable(formula.toString());
             e = e.putTrue(v);
             return e;
         }
 
-        //Check for empty clause
+        //Iterate through list of clauses
         ImList<Clause> clauseList = formula.getClauses(); //returns ImList<Clause>
         Iterator<Clause> iter = formula.iterator();
         Clause smallestClause = new Clause();
@@ -45,19 +45,21 @@ public class SATSolver {
         while (iter.hasNext()) {
 
             Clause currentClause = iter.next();
+            //Check for empty clause
+            if (currentClause.isEmpty()) {
+                return e = null;
 
-
+            }
+            //Find smallest clause
             if (currentClause.size() < size) {
                 smallestClause = currentClause;
                 size=currentClause.size();
-
             }
-            if (currentClause.isEmpty()) {
+            }
 
-                return e = null;
-            }}
-
+            //Unit propagation
             if (smallestClause.isUnit()){
+
                     Variable v = new Variable(smallestClause.toString());
                     e = e.putTrue(v);
 
@@ -66,19 +68,22 @@ public class SATSolver {
                     return solve(f);
                 } else {
                     Literal lit = smallestClause.chooseLiteral();
-                System.out.println(smallestClause);
+                System.out.println(lit);
                     Variable v = new Variable(lit.getVariable().toString());
+
                 try {
-                    e = e.put(v,Bool.FALSE);
-                    System.out.println("bef" + clauseList);
-                        Formula f = new Formula(substitute(clauseList, lit));
+                    System.out.println("set literal to true");
+                    e = e.put(v,Bool.TRUE);
+                    System.out.println(e);
+                    Formula f = new Formula(substitute(clauseList, lit));
+                    System.out.println("substituted");
+
                     //problem with substitute
-                    System.out.println("lol "+f);
-                        return solve(f);
+                    return solve(f);
+
                     } catch (Exception ex)
                     {
                         try {
-
                             e= e.putFalse(v);
                             Literal nlit = lit.getNegation();
                             Formula f = new Formula(substitute(clauseList, nlit));
@@ -108,7 +113,7 @@ public class SATSolver {
      *         or null if no such environment exists.
      */
     private static Environment solve(ImList<Clause> clauses, Environment env) {
-        // TODO: implement this.
+
         throw new RuntimeException("not yet implemented.");
     }
 
@@ -133,15 +138,19 @@ public class SATSolver {
         ImList<Clause> subsClauseList = new EmptyImList<Clause>();
         while(iter.hasNext()){
             Clause subsClause = iter.next();
+            System.out.println("before reduction "+subsClause);
             subsClause = subsClause.reduce(l);
-            System.out.println(subsClause);
-            System.out.println(iter.hasNext());
+            System.out.println("is this null? :"+subsClause);
 
             if(!subsClause.equals(null)) {
                 subsClauseList = subsClauseList.add(subsClause);
+                System.out.println("reducedlist"+subsClauseList);
+
+
             }
         }
         return subsClauseList;
+
 //        Clause first = clauses.first().reduce(l);
 //        ImList<Clause> rest = clauses.rest();
 //        System.out.println(rest);

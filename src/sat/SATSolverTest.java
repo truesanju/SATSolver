@@ -81,12 +81,6 @@ public class SATSolverTest {
 
 
 
-
-
-
-
-	// TODO: have yet to call SATSolver.solve to determine the satisfiability
-    
 	
     public void testSATSolver1(){
     	// (a v b)
