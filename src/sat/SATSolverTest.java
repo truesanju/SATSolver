@@ -21,7 +21,7 @@ public class SATSolverTest {
 
     public static void main(String[] args) {
 
-        String path =  "C:\\Users\\Charles\\Documents\\GitHub\\SATSolver\\sampleCNF\\unsat3large.cnf";
+        String path =  "C:\\Users\\Charles\\Documents\\GitHub\\SATSolver\\sampleCNF\\unsat2.cnf";
         Formula formula;
 
         try{
@@ -46,6 +46,9 @@ public class SATSolverTest {
 
                 if (!currentLine.equals("")) {
                     if (!(currentLine.charAt(0) == ('c')) && !(currentLine.charAt(0) == ('p'))) {
+                        if(currentLine.charAt(0) == ' '){
+                            currentLine = currentLine.substring(1);
+                        }
                         clauseStr = currentLine.replace(" 0", "").split("\\s+");
                         for(int j=0;j<clauseStr.length;j++){
                             if(clauseStr[j].charAt(0)=='-'){
@@ -71,6 +74,11 @@ public class SATSolverTest {
             long timeTaken = System.nanoTime()-started;
 
             System.out.println("Time:" + timeTaken/1000000.0 + "ms");
+            if(e == null){
+                System.out.println("Unsatisfiable");
+            }else{
+                System.out.println("Satisfiable");
+            }
             System.out.println(e);
 
         } catch(IOException e){

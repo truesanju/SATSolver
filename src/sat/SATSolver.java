@@ -1,15 +1,15 @@
 package sat;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import immutable.EmptyImList;
 import immutable.ImList;
+import javafx.geometry.Pos;
 import sat.env.Bool;
 import sat.env.Environment;
 import sat.env.Variable;
-import sat.formula.Clause;
-import sat.formula.Formula;
-import sat.formula.Literal;
+import sat.formula.*;
 
 /**
  * A simple DPLL SAT solver. See http://en.wikipedia.org/wiki/DPLL_algorithm
@@ -23,11 +23,13 @@ public class SATSolver {
      * unit propagation. The returned environment binds literals of class
      * bool.Variable rather than the special literals used in clausification of
      * class clausal.Literal, so that clients can more readily use it.
-     * 
+     *
      * @return an environment for which the problem evaluates to Bool.TRUE, or
      *         null if no such environment exists.
      */
     public static Environment solve(Formula formula) {
+
+        ArrayList<Literal> triedLits = new ArrayList<>();
         //If no clauses, return true
         if(formula.getSize()==0){
             Variable v = new Variable(formula.toString());
@@ -54,10 +56,25 @@ public class SATSolver {
             //Unit propagation
             if (smallestClause.isUnit()){
                     Variable v = new Variable(smallestClause.toString());
+                Literal posLiteral = PosLiteral.make(v);
+                Literal negLiteral = NegLiteral.make(v);
+                try {
                     e = e.putTrue(v);
-                    clauseList = clauseList.remove(smallestClause);
-                    Formula f = new Formula(substitute(clauseList,smallestClause.chooseLiteral()));
+//                    clauseList = clauseList.remove(smallestClause);
+                    triedLits.add(posLiteral);
+                    Formula f = new Formula(substitute(clauseList, posLiteral));
                     return solve(f);
+                } catch(Exception error){
+                    try {
+                        triedLits.add(negLiteral);
+                        Formula f = new Formula(substitute(clauseList, negLiteral));
+                        return solve(f);
+                    } catch(Exception error2){
+                        Formula f = new Formula(clauseList);
+                        return solve(f);
+                    }
+
+                }
                 } else {
                     Literal lit = smallestClause.chooseLiteral();
                     Variable v = new Variable(lit.getVariable().toString());
@@ -89,7 +106,7 @@ public class SATSolver {
     /**
      * Takes a partial assignment of variables to values, and recursively
      * searches for a complete satisfying assignment.
-     * 
+     *
      * @param clauses
      *            formula in conjunctive normal form
      * @param env
@@ -106,7 +123,7 @@ public class SATSolver {
     /**
      * given a clause list and literal, produce a new list resulting from
      * setting that literal to true
-     * 
+     *
      * @param clauses
      *            , a list of clauses
      * @param l
@@ -130,6 +147,9 @@ public class SATSolver {
             //EXCEPTION GETS THROWN AND WHOLE LOGIC IS KICKED TO SETTING 13 TO FALSE
             //the below conditional does not like it when subsclause is null
             if(subsClause != null) {
+//                if (subsClause.isEmpty()) {
+//                    throw new Exception("Empty clause");
+//                }
                 subsClauseList = subsClauseList.add(subsClause);
             }
 
