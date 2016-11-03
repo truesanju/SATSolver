@@ -14,18 +14,14 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class SATSolverTest {
-    Literal a = PosLiteral.make("a");
-    Literal b = PosLiteral.make("b");
-    Literal c = PosLiteral.make("c");
-    Literal na = a.getNegation();
-    Literal nb = b.getNegation();
-    Literal nc = c.getNegation();
+
 
     public static void main(String[] args) {
 
-        String path =  "C:\\Users\\Sanjay\\Desktop\\School\\Fall 2016\\Intro to Info Systems and Programming\\2D\\Project-2D-starting\\SATSolver\\sampleCNF\\s8Sat.cnf";
+        String path =  "C:\\Users\\Charles\\Documents\\GitHub\\SATSolver\\sampleCNF\\unsat3large.cnf";
         Formula formula;
 
         try{
@@ -39,7 +35,6 @@ public class SATSolverTest {
             } bf.close();
 
             FileReader newRead = new FileReader(path);
-
             BufferedReader textReader = new BufferedReader(newRead);  // start stream for parsing cnf
             String[] clauseStr;
             Clause clause;
@@ -70,8 +65,13 @@ public class SATSolverTest {
             clauseList.toArray(clauseArray);
             formula = makeFm(clauseArray);
             textReader.close();
-            System.out.println(SATSolver.solve(formula));
+            long started = System.nanoTime();
+            Environment e = SATSolver.solve(formula);
 
+            long timeTaken = System.nanoTime()-started;
+
+            System.out.println("Time:" + timeTaken/1000000.0 + "ms");
+            System.out.println(e);
 
         } catch(IOException e){
             System.out.println(e.getMessage());
@@ -82,25 +82,25 @@ public class SATSolverTest {
 
 
 	
-    public void testSATSolver1(){
-    	// (a v b)
-    	Environment e = SATSolver.solve(makeFm(makeCl(a,b))	);
-/*
-    	assertTrue( "one of the literals should be set to true",
-    			Bool.TRUE == e.get(a.getVariable())  
-    			|| Bool.TRUE == e.get(b.getVariable())	);
-    	
-*/    	
-    }
-    
-    
-    public void testSATSolver2(){
-    	// (~a)
-    	Environment e = SATSolver.solve(makeFm(makeCl(na)));
-/*
-    	assertEquals( Bool.FALSE, e.get(na.getVariable()));
-*/    	
-    }
+//    public void testSATSolver1(){
+//    	// (a v b)
+//    	Environment e = SATSolver.solve(makeFm(makeCl(a,b))	);
+///*
+//    	assertTrue( "one of the literals should be set to true",
+//    			Bool.TRUE == e.get(a.getVariable())
+//    			|| Bool.TRUE == e.get(b.getVariable())	);
+//
+//*/
+//    }
+//
+//
+//    public void testSATSolver2(){
+//    	// (~a)
+//    	Environment e = SATSolver.solve(makeFm(makeCl(na)));
+///*
+//    	assertEquals( Bool.FALSE, e.get(na.getVariable()));
+//*/
+//    }
     
     private static Formula makeFm(Clause... e) {
         Formula f = new Formula();

@@ -28,27 +28,22 @@ public class SATSolver {
      *         null if no such environment exists.
      */
     public static Environment solve(Formula formula) {
-
-
         //If no clauses, return true
         if(formula.getSize()==0){
             Variable v = new Variable(formula.toString());
             e = e.putTrue(v);
             return e;
         }
-
         //Iterate through list of clauses
         ImList<Clause> clauseList = formula.getClauses(); //returns ImList<Clause>
         Iterator<Clause> iter = formula.iterator();
         Clause smallestClause = new Clause();
         int size = 10;
         while (iter.hasNext()) {
-
             Clause currentClause = iter.next();
             //Check for empty clause
             if (currentClause.isEmpty()) {
                 return e = null;
-
             }
             //Find smallest clause
             if (currentClause.size() < size) {
@@ -56,29 +51,20 @@ public class SATSolver {
                 size=currentClause.size();
             }
             }
-
             //Unit propagation
             if (smallestClause.isUnit()){
-
                     Variable v = new Variable(smallestClause.toString());
                     e = e.putTrue(v);
-
                     clauseList = clauseList.remove(smallestClause);
                     Formula f = new Formula(substitute(clauseList,smallestClause.chooseLiteral()));
                     return solve(f);
                 } else {
                     Literal lit = smallestClause.chooseLiteral();
-                System.out.println(lit);
                     Variable v = new Variable(lit.getVariable().toString());
 
                 try {
-                    System.out.println("set literal to true");
                     e = e.put(v,Bool.TRUE);
-                    System.out.println(e);
-                    Formula f = new Formula(substitute(clauseList, lit));
-                    System.out.println("substituted");
-
-                    //problem with substitute
+                    Formula f = new Formula(substitute(clauseList, lit)); //DIES ON THIS STEP
                     return solve(f);
 
                     } catch (Exception ex)
@@ -138,16 +124,15 @@ public class SATSolver {
         ImList<Clause> subsClauseList = new EmptyImList<Clause>();
         while(iter.hasNext()){
             Clause subsClause = iter.next();
-            System.out.println("before reduction "+subsClause);
+//            System.out.println("Literal: "+l);
             subsClause = subsClause.reduce(l);
-            System.out.println("is this null? :"+subsClause);
-
-            if(!subsClause.equals(null)) {
+            //IT DIES HERE IF SUBSCLAUSE IS NULL
+            //EXCEPTION GETS THROWN AND WHOLE LOGIC IS KICKED TO SETTING 13 TO FALSE
+            //the below conditional does not like it when subsclause is null
+            if(subsClause != null) {
                 subsClauseList = subsClauseList.add(subsClause);
-                System.out.println("reducedlist"+subsClauseList);
-
-
             }
+
         }
         return subsClauseList;
 

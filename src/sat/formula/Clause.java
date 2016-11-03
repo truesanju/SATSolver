@@ -170,19 +170,13 @@ public class Clause implements Iterable<Literal> {
         Literal first = literals.first();
 
         ImList<Literal> rest = literals.rest();
-        System.out.println("not including first term "+ rest);
         if (first.equals(l)) return null;
 
         else if (first.equals(l.getNegation())) {
-            System.out.println("equals -13");
-
             return rest;
         }
             else {
-
             ImList<Literal> restR = reduce(rest, l);
-            System.out.println("rest R: "+restR);
-
             if (restR == null) return null;
             return restR.add(first);
         }
