@@ -10,9 +10,11 @@ import sat.env.*;
 import sat.formula.*;
 import sat.SATSolver;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -21,7 +23,7 @@ public class SATSolverTest {
 
     public static void main(String[] args) {
 
-        String path =  "C:\\Users\\Charles\\Documents\\GitHub\\SATSolver\\sampleCNF\\unsat3large.cnf";
+        String path =  "C:\\Users\\Charles\\Documents\\GitHub\\SATSolver\\sampleCNF\\largesat.cnf";
         Formula formula;
 
         try{
@@ -46,6 +48,9 @@ public class SATSolverTest {
 
                 if (!currentLine.equals("")) {
                     if (!(currentLine.charAt(0) == ('c')) && !(currentLine.charAt(0) == ('p'))) {
+                        if(currentLine.charAt(0) == ' '){
+                            currentLine = currentLine.substring(1);
+                        }
                         clauseStr = currentLine.replace(" 0", "").split("\\s+");
                         for(int j=0;j<clauseStr.length;j++){
                             if(clauseStr[j].charAt(0)=='-'){
@@ -65,13 +70,43 @@ public class SATSolverTest {
             clauseList.toArray(clauseArray);
             formula = makeFm(clauseArray);
             textReader.close();
+
+            System.out.println("SAT solver starts!!!");
             long started = System.nanoTime();
             Environment e = SATSolver.solve(formula);
-
-            long timeTaken = System.nanoTime()-started;
-
+            long time = System.nanoTime();
+            long timeTaken= time -started;
             System.out.println("Time:" + timeTaken/1000000.0 + "ms");
-            System.out.println(e);
+
+            if(e==null){
+                System.out.println("unsatisfiable");
+            } else{
+                System.out.println("satisfiable");
+            }
+
+            String eString = e.toString();
+            eString = eString.replaceAll("->",":");
+            eString = eString.replaceAll("\\w*:\\[","");
+            eString = eString.replaceAll("\\]","");
+            eString = eString.replaceAll(" ","");
+
+            String[] lines = eString.split(",");
+
+//            Path file = new File("C:\\Users\\Charles\\Documents\\GitHub\\SATSolver\\BoolAssignment.txt");
+//            Files.write(file, lines, Charset.forName("UTF-8"));
+
+            File fout = new File("BoolAssignment.txt");
+
+            FileOutputStream fos = new FileOutputStream(fout);
+
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+
+            for (int i = 0; i < lines.length; i++) {
+                bw.write(lines[i]);
+                bw.newLine();
+            }
+
+            bw.close();
 
         } catch(IOException e){
             System.out.println(e.getMessage());
@@ -79,28 +114,6 @@ public class SATSolverTest {
 
     }
 
-
-
-	
-//    public void testSATSolver1(){
-//    	// (a v b)
-//    	Environment e = SATSolver.solve(makeFm(makeCl(a,b))	);
-///*
-//    	assertTrue( "one of the literals should be set to true",
-//    			Bool.TRUE == e.get(a.getVariable())
-//    			|| Bool.TRUE == e.get(b.getVariable())	);
-//
-//*/
-//    }
-//
-//
-//    public void testSATSolver2(){
-//    	// (~a)
-//    	Environment e = SATSolver.solve(makeFm(makeCl(na)));
-///*
-//    	assertEquals( Bool.FALSE, e.get(na.getVariable()));
-//*/
-//    }
     
     private static Formula makeFm(Clause... e) {
         Formula f = new Formula();

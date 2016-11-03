@@ -1,15 +1,15 @@
 package sat;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import immutable.EmptyImList;
 import immutable.ImList;
+import javafx.geometry.Pos;
 import sat.env.Bool;
 import sat.env.Environment;
 import sat.env.Variable;
-import sat.formula.Clause;
-import sat.formula.Formula;
-import sat.formula.Literal;
+import sat.formula.*;
 
 /**
  * A simple DPLL SAT solver. See http://en.wikipedia.org/wiki/DPLL_algorithm
@@ -23,73 +23,23 @@ public class SATSolver {
      * unit propagation. The returned environment binds literals of class
      * bool.Variable rather than the special literals used in clausification of
      * class clausal.Literal, so that clients can more readily use it.
-     * 
+     *
      * @return an environment for which the problem evaluates to Bool.TRUE, or
      *         null if no such environment exists.
      */
     public static Environment solve(Formula formula) {
-        //If no clauses, return true
-        if(formula.getSize()==0){
-            Variable v = new Variable(formula.toString());
-            e = e.putTrue(v);
-            return e;
-        }
-        //Iterate through list of clauses
-        ImList<Clause> clauseList = formula.getClauses(); //returns ImList<Clause>
-        Iterator<Clause> iter = formula.iterator();
-        Clause smallestClause = new Clause();
-        int size = 10;
-        while (iter.hasNext()) {
-            Clause currentClause = iter.next();
-            //Check for empty clause
-            if (currentClause.isEmpty()) {
-                return e = null;
-            }
-            //Find smallest clause
-            if (currentClause.size() < size) {
-                smallestClause = currentClause;
-                size=currentClause.size();
-            }
-            }
-            //Unit propagation
-            if (smallestClause.isUnit()){
-                    Variable v = new Variable(smallestClause.toString());
-                    e = e.putTrue(v);
-                    clauseList = clauseList.remove(smallestClause);
-                    Formula f = new Formula(substitute(clauseList,smallestClause.chooseLiteral()));
-                    return solve(f);
-                } else {
-                    Literal lit = smallestClause.chooseLiteral();
-                    Variable v = new Variable(lit.getVariable().toString());
+        Environment environment = new Environment();
+        ImList<Clause> clauseImList = formula.getClauses();
+        Environment solution = solve(clauseImList,environment);
 
-                try {
-                    e = e.put(v,Bool.TRUE);
-                    Formula f = new Formula(substitute(clauseList, lit)); //DIES ON THIS STEP
-                    return solve(f);
-
-                    } catch (Exception ex)
-                    {
-                        try {
-                            e= e.putFalse(v);
-                            Literal nlit = lit.getNegation();
-                            Formula f = new Formula(substitute(clauseList, nlit));
-                            return solve(f);
-                        } catch (Exception x){
-
-                            return e=null;
-
-
-                }}
-
-            }
-
+        return solution;
 
     }
 
     /**
      * Takes a partial assignment of variables to values, and recursively
      * searches for a complete satisfying assignment.
-     * 
+     *
      * @param clauses
      *            formula in conjunctive normal form
      * @param env
@@ -99,14 +49,62 @@ public class SATSolver {
      *         or null if no such environment exists.
      */
     private static Environment solve(ImList<Clause> clauses, Environment env) {
+        if(clauses.size() == 0){
+            return env;
+        }
 
-        throw new RuntimeException("not yet implemented.");
+        int minClauseSize = 9999;
+        Clause minClause = null;
+
+        //Finding smallest clause
+        for(Clause i : clauses){
+            if(i.size() < minClauseSize){
+                minClause = i;
+                minClauseSize = i.size();
+            }
+        }
+
+        //Checking if clause is empty - not solvable
+        if(minClauseSize == 0){
+            return null;
+        } else if(minClauseSize == 1){  // Checking if clause is unit clause
+            Literal lit = minClause.chooseLiteral();
+            Variable var = lit.getVariable();
+            Literal checkLit = PosLiteral.make(var);
+
+            if(checkLit.negates(lit)){    //Checking if literal is negative ~
+                Environment newEnv = env.putFalse(var);  //var is ~, so set to false
+                ImList<Clause> newClauseList = substitute(clauses,lit);
+                return solve(newClauseList,newEnv);
+            } else{
+                Environment newEnv = env.putTrue(var); //var is pos, so set to true
+                ImList<Clause> newClauseList = substitute(clauses,lit);
+                return solve(newClauseList,newEnv);
+            }
+        }
+
+        //For cases where min clause size > 1
+        Literal lit = minClause.chooseLiteral();
+        Variable var = lit.getVariable();
+        Environment newEnv = env.putTrue(var);
+        Literal posLiteral = PosLiteral.make(var);
+        ImList<Clause> newClauses = substitute(clauses, posLiteral); // clauses after setting literal true
+        Environment solution = solve(newClauses, newEnv);
+
+        if (solution == null) {
+            newEnv = env.putFalse(var); // change branch, try var false
+            Literal negLiteral = NegLiteral.make(var);
+            newClauses = substitute(clauses, negLiteral);
+            return solve(newClauses, newEnv);
+        }
+        return solution;
+
     }
 
     /**
      * given a clause list and literal, produce a new list resulting from
      * setting that literal to true
-     * 
+     *
      * @param clauses
      *            , a list of clauses
      * @param l
@@ -130,6 +128,9 @@ public class SATSolver {
             //EXCEPTION GETS THROWN AND WHOLE LOGIC IS KICKED TO SETTING 13 TO FALSE
             //the below conditional does not like it when subsclause is null
             if(subsClause != null) {
+//                if (subsClause.isEmpty()) {
+//                    throw new Exception("Empty clause");
+//                }
                 subsClauseList = subsClauseList.add(subsClause);
             }
 
